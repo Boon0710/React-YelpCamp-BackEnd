@@ -71,3 +71,11 @@ module.exports.validateReview = (req, res, next) => {
         next();
     }
 }
+
+module.exports.isProfileOwner = (req, res, next) => {
+    const { userId } = req.params;
+    if (!req.user || req.user._id.toString() !== userId) {
+      return res.status(403).json({ message: 'You do not have permission to update this profile.' });
+    }
+    next();
+  };

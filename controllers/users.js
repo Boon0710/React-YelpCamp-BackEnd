@@ -1,6 +1,7 @@
 const User = require("../models/user");
 const Review = require("../models/review");
 const Campground = require("../models/campground");
+const Booking = require("../models/booking");
 const passport = require("passport");
 
 module.exports.renderRegister = (req, res) => {
@@ -78,17 +79,17 @@ module.exports.viewUserProfile = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Fetch campgrounds and reviews separately, based on the author's ID
         const campgrounds = await Campground.find({ author: req.params.userId });
         const reviews = await Review.find({ author: req.params.userId });
+        const bookings = await Booking.find({ user: req.params.userId }).populate('campground');
 
-        res.status(200).json({ user, campgrounds, reviews });
+        res.status(200).json({ user, campgrounds, reviews, bookings });
     } catch (e) {
         res.status(500).json({ message: 'Error fetching user profile', error: e.message });
     }
 };
 
-// Update user profile
+
 module.exports.updateUserProfile = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -98,20 +99,19 @@ module.exports.updateUserProfile = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Update basic fields
     user.bio = bio;
     user.location = location;
     user.fullName = fullName;
     user.gender = gender;
     user.phoneNumber = phoneNumber;
 
-    // Handle profile picture upload if file is provided
+    
     if (req.file) {
       const { path, filename } = req.file;
       user.profilePicture = { url: path, filename };
     }
 
-    // Save the updated user
+    
     await user.save();
 
     res.status(200).json({ message: "Profile updated successfully", user });

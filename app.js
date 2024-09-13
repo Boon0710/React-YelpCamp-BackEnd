@@ -22,6 +22,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const userRoutes = require('./routes/users');
 const campgroundRoutes = require('./routes/campgrounds');
 const reviewRoutes = require('./routes/reviews');
+const bookingRoutes = require('./routes/bookings');
 
 moongose.connect('mongodb://localhost:27017/yelp-camp')
 const db = moongose.connection;
@@ -47,7 +48,7 @@ app.use(mongoSanitize({
 
 
 const corsOptions = {
-    origin: 'http://localhost:5173',  // Allow requests from your frontend
+    origin: 'http://localhost:5173',  
     credentials: true  // Enable sending credentials (cookies, sessions, etc.)
 };
 app.use(cors(corsOptions));
@@ -129,6 +130,7 @@ app.use((req, res, next) => {
 app.use('/', userRoutes)
 app.use('/campgrounds', campgroundRoutes);
 app.use('/campgrounds/:id/reviews', reviewRoutes);
+app.use('/campgrounds/:id/bookings', bookingRoutes);
 
 app.all('*', (req, res, next) => {
     next(new ExpressError('Not Found', 404))
@@ -140,8 +142,7 @@ app.use((err, req, res, next) => {
         // Respond with JSON if it's an API request
         res.status(statusCode).json({ message: err.message || "Something went wrong" });
     } else {
-        // If it's not an API request, render the error view (for non-API routes)
-        res.status(statusCode).render('error', { err });
+        res.status(statusCode);
     }
 })
 
